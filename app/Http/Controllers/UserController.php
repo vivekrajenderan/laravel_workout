@@ -12,7 +12,7 @@ use App\Models\Customers;
 use Illuminate\Http\Request;
 use Validator;
 use Auth;
-use Maatwebsite\Excel\Facades\Excel;
+use Excel;
 
 class UserController extends Controller {
 
@@ -177,16 +177,20 @@ class UserController extends Controller {
                 $sheet->cell('E1', 'Mobile No');
                 $sheet->cell('F1', 'VC Number');
                 $sheet->cell('G1', 'Created On');
-                $x=2;
+                $x = 2;
                 foreach ($payments as $key => $value) {
+
+                    $sheet->cell('A' . $x, $key + 1);
+                    $sheet->cell('B' . $x, $value['fname']);
+                    $sheet->cell("B".$x,function($cell) {
+                        $cell->setBackground('#ccc');                        
+                    });                    
+                    $sheet->cell('C' . $x, $value['lname']);
+                    $sheet->cell('D' . $x, $value['emailid']);
+                    $sheet->cell('E' . $x, $value['mobileno']);
+                    $sheet->cell('F' . $x, $value['vc_number']);
+                    $sheet->cell('G' . $x, $value['created_on']);
                     
-                    $sheet->cell('A'.$x, $key+1);
-                    $sheet->cell('B'.$x, $value['fname']);
-                    $sheet->cell('C'.$x, $value['lname']);
-                    $sheet->cell('D'.$x, $value['emailid']);
-                    $sheet->cell('E'.$x, $value['mobileno']);
-                    $sheet->cell('F'.$x, $value['vc_number']);
-                    $sheet->cell('G'.$x, $value['created_on']);
                     $x++;
                 }
             });
