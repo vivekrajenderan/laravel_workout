@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Validator;
 use Auth;
 use Excel;
+use Input;
 
 class UserController extends Controller {
 
@@ -151,18 +152,7 @@ class UserController extends Controller {
     }
 
     public function excel() {
-
-
         $payments = Customers::get()->toArray();
-        //$paymentsArray[] = ['pk_cust_id', 'fname','lname','emailid','mobileno','vc_number','created_on'];
-//    foreach ($payments as $payment) {
-//        $paymentsArray[] = $payment->toArray();
-//    }
-        // Initialize the array which will be passed into the Excel
-        // generator.
-        //$paymentsArray = []; 
-        // Define the Excel spreadsheet headers
-        // Generate and return the spreadsheet
         Excel::create('Users', function($excel) use ($payments) {
 
             // Set the spreadsheet title, creator, and description
@@ -171,35 +161,79 @@ class UserController extends Controller {
             $excel->setDescription('User Report file');
             $excel->sheet('sheet1', function($sheet) use ($payments) {
                 $sheet->cell('A1', 'Sl.No');
-                $sheet->cell('B1', 'First Name');
-                $sheet->cell('C1', 'Last Name');
-                $sheet->cell('D1', 'Email ID');
-                $sheet->cell('E1', 'Mobile No');
-                $sheet->cell('F1', 'VC Number');
-                $sheet->cell('G1', 'Created On');
+                $sheet->cell('B1', 'firstname');
+                $sheet->cell('C1', 'lastname');
+                $sheet->cell('D1', 'emailid');
+                $sheet->cell('E1', 'mobileno');
+                $sheet->cell('F1', 'vcnumber');
+            
                 $x = 2;
                 foreach ($payments as $key => $value) {
 
                     $sheet->cell('A' . $x, $key + 1);
                     $sheet->cell('B' . $x, $value['fname']);
-                    $sheet->cell("B".$x,function($cell) {
-                        $cell->setBackground('#ccc');                        
-                    });                    
+//                    $sheet->cell("B" . $x, function($cell) {
+//                        $cell->setBackground('#ccc');
+//                    });
                     $sheet->cell('C' . $x, $value['lname']);
                     $sheet->cell('D' . $x, $value['emailid']);
                     $sheet->cell('E' . $x, $value['mobileno']);
                     $sheet->cell('F' . $x, $value['vc_number']);
-                    $sheet->cell('G' . $x, $value['created_on']);
-                    
+                    //$sheet->cell('G' . $x, $value['created_on']);
+
                     $x++;
                 }
             });
-            // Build the spreadsheet, passing in the payments array
-//        $excel->sheet('sheet1', function($sheet) use ($paymentsArray) {
-//            
-//            $sheet->fromArray($paymentsArray, null, 'A2', false, false);
-//        });
         })->download('xlsx');
+    }
+
+    public function importexcel() {
+        if (Input::hasFile('import_file')) {
+
+            //We can use two way
+            //First way
+            //$path = $request->import_file->getRealPath();
+            //Second way
+            $path = Input::file('import_file')->getRealPath();
+
+            $data = Excel::load($path, function($reader) {
+                        
+                    })->get();
+
+            if (!empty($data) && $data->count()) {
+                $x = 0;
+                foreach ($data as $key => $value) {
+
+                    $check_email = Customers::select('emailid')->where('emailid', $value->emailid)->get()->toArray();
+
+                    $checkvcnumber = Customers::select('vc_number')->where('vc_number', $value->vcnumber)->get()->toArray();
+
+
+                    if ($value->firstname != "" && $value->lastname != "" && count($check_email) == 0 && $value->mobileno && count($checkvcnumber) == 0) {
+                        $add_user = DB::table('cust_mst')->insert(
+                                ['emailid' => $value->emailid, 'fname' => $value->firstname, 'lname' => $value->lastname, 'mobileno' => $value->mobileno, 'vc_number' => $value->vcnumber]
+                        );
+                        $x++;
+                    }
+
+
+                    //$insert[] = ['title' => $value->title, 'description' => $value->description];
+                }
+
+
+                if ($x > 0) {     
+                    Session::flash('SucMessage', $x . ' User Added Successfully');
+                    echo json_encode(array('status' => 1, 'msg' => $x . ' User Added Successfully'));
+                   
+                } else {
+                    //echo $x;
+                    echo json_encode(array('status' => 0, 'msg' => 'Users Added Not Successfully'));
+                    
+                }
+            }
+        }
+
+        //return back();
     }
 
 }

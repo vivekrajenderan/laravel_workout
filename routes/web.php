@@ -61,6 +61,9 @@ Route::group(['prefix' => 'admin'], function () {
     Route::get('user/excel', 'UserController@excel');
 });
 
+Route::group(['prefix' => 'admin'], function () {
+    Route::post('user/importexcel', 'UserController@importexcel');
+});
 // User create,edit,list end
 
 //Channel create,edit,list start
@@ -81,5 +84,7 @@ Route::group(['prefix' => 'admin'], function () {
 Route::group(['prefix' => 'admin'], function () {
     Route::post('channel/exist-channel-check', 'ChannelController@exist_channel_check');
 });
+
+
 
 });
