@@ -12,12 +12,14 @@ use App\Models\Customers;
 use Illuminate\Http\Request;
 use Validator;
 use Auth;
+use Maatwebsite\Excel\Facades\Excel;
+
 class UserController extends Controller {
 
-    public function __construct()
-    {
-     $this->middleware('auth');
+    public function __construct() {
+        $this->middleware('auth');
     }
+
     /**
      * Show the profile for the given user.
      *
@@ -96,18 +98,17 @@ class UserController extends Controller {
             }
         }
     }
-    
-    public function edit($id) {        
+
+    public function edit($id) {
         $get_user_list = Customers::where(DB::raw('md5(pk_cust_id)'), $id)->get()->toArray();
-        if(count($get_user_list)>0)
-        {
-        $data = array(
-            'get_user_list' => $get_user_list,'pk_cust_id' => $id
-        );
-        return View::make('admin.customers.edit')->with($data);
-        }        
+        if (count($get_user_list) > 0) {
+            $data = array(
+                'get_user_list' => $get_user_list, 'pk_cust_id' => $id
+            );
+            return View::make('admin.customers.edit')->with($data);
+        }
     }
-    
+
     public function ajax_edit(Request $request) {
         $validator = Validator::make($request->all(), [
                     'emailid' => 'required|email',
@@ -123,7 +124,7 @@ class UserController extends Controller {
                         'msg' => $validator->getMessageBag()->toArray()
                             ], 200);
         } else {
-            $id=$request->input('pk_cust_id');
+            $id = $request->input('pk_cust_id');
             $update_user = DB::table('cust_mst')->where(DB::raw('md5(pk_cust_id)'), $id)->update(
                     ['emailid' => $request->input('emailid'), 'fname' => $request->input('fname'), 'lname' => $request->input('lname'), 'mobileno' => $request->input('mobileno'), 'vc_number' => $request->input('vc_number')]
             );
@@ -135,20 +136,66 @@ class UserController extends Controller {
             }
         }
     }
-    
+
     public function change_users_active(Request $request) {
-         if ($request->method() == "POST") {            
+        if ($request->method() == "POST") {
             $id = trim($request->input('pk_cust_id'));
             $update_user = DB::table('cust_mst')->where(DB::raw('md5(pk_cust_id)'), $id)->update(['standing' => $request->input('standing')]);
-            $standing=($request->input('standing')==1 ? 'Active' : 'Inactive');
-            if ($update_user == 1) {                
+            $standing = ($request->input('standing') == 1 ? 'Active' : 'Inactive');
+            if ($update_user == 1) {
                 echo json_encode(array('status' => 1, 'msg' => "User $standing Successfully"));
             } else {
                 echo json_encode(array('status' => 0, 'msg' => "User $standing Not Successfully"));
             }
         }
     }
-    
-    
+
+    public function excel() {
+
+
+        $payments = Customers::get()->toArray();
+        //$paymentsArray[] = ['pk_cust_id', 'fname','lname','emailid','mobileno','vc_number','created_on'];
+//    foreach ($payments as $payment) {
+//        $paymentsArray[] = $payment->toArray();
+//    }
+        // Initialize the array which will be passed into the Excel
+        // generator.
+        //$paymentsArray = []; 
+        // Define the Excel spreadsheet headers
+        // Generate and return the spreadsheet
+        Excel::create('Users', function($excel) use ($payments) {
+
+            // Set the spreadsheet title, creator, and description
+            $excel->setTitle('Users');
+            $excel->setCreator('User')->setCompany('AADHAR');
+            $excel->setDescription('User Report file');
+            $excel->sheet('sheet1', function($sheet) use ($payments) {
+                $sheet->cell('A1', 'Sl.No');
+                $sheet->cell('B1', 'First Name');
+                $sheet->cell('C1', 'Last Name');
+                $sheet->cell('D1', 'Email ID');
+                $sheet->cell('E1', 'Mobile No');
+                $sheet->cell('F1', 'VC Number');
+                $sheet->cell('G1', 'Created On');
+                $x=2;
+                foreach ($payments as $key => $value) {
+                    
+                    $sheet->cell('A'.$x, $key+1);
+                    $sheet->cell('B'.$x, $value['fname']);
+                    $sheet->cell('C'.$x, $value['lname']);
+                    $sheet->cell('D'.$x, $value['emailid']);
+                    $sheet->cell('E'.$x, $value['mobileno']);
+                    $sheet->cell('F'.$x, $value['vc_number']);
+                    $sheet->cell('G'.$x, $value['created_on']);
+                    $x++;
+                }
+            });
+            // Build the spreadsheet, passing in the payments array
+//        $excel->sheet('sheet1', function($sheet) use ($paymentsArray) {
+//            
+//            $sheet->fromArray($paymentsArray, null, 'A2', false, false);
+//        });
+        })->download('xlsx');
+    }
 
 }

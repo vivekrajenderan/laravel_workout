@@ -24,6 +24,7 @@
                     <div class="x_title">
                         <h2>Users <small>List</small></h2>
                         <ul class="nav navbar-right panel_toolbox">
+                            <li><a href="<?php echo url('/admin/user/excel'); ?>" target="_blank" title="Excel"><i class="fa fa-edit"></i></a></li>
                             <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                             </li>                      
                             <li><a class="close-link"><i class="fa fa-close"></i></a>

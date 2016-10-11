@@ -56,6 +56,11 @@ Route::group(['prefix' => 'admin'], function () {
 Route::group(['prefix' => 'admin'], function () {
     Route::post('user/change-users-active', 'UserController@change_users_active');
 });
+
+Route::group(['prefix' => 'admin'], function () {
+    Route::get('user/excel', 'UserController@excel');
+});
+
 // User create,edit,list end
 
 //Channel create,edit,list start
