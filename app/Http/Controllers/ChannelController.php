@@ -122,6 +122,10 @@ class ChannelController extends Controller {
             );
             return View::make('admin.channel.edit')->with($data);
         }
+        else
+        {
+            return redirect('admin/channel');
+        }
     }
 
     public function ajax_edit(Request $request) {
@@ -136,7 +140,7 @@ class ChannelController extends Controller {
             'pk_cat_id' => 'required',
             'channel_name' => 'required',
             'channel_no' => 'required',
-            'channel_url' => 'required'          
+            'channel_url' => 'required'
         );
 
         $validator = Validator::make($request->all(), $rules, $messsages);
@@ -155,7 +159,7 @@ class ChannelController extends Controller {
                             ->join('category_mst as c', 'ch.fk_cat_id', '=', 'c.pk_cat_id')
                             ->select(DB::raw('ch.*,c.cate_name'))
                             ->get()->toArray();
-            $filename=$get_channel_list[0]['channel_logo'];
+            $filename = $get_channel_list[0]['channel_logo'];
             If (Input::hasFile('channel_logo')) {
                 if ($get_channel_list[0]["channel_logo"] != "") {
                     $image_file = './upload/channel/' . $get_channel_list[0]["channel_logo"];
@@ -193,6 +197,26 @@ class ChannelController extends Controller {
                 echo json_encode(array('status' => 0, 'msg' => "Channel $standing Not Successfully"));
             }
         }
+    }
+
+    public function delete($id) {
+        $get_channel_list = Channel::from('channel_mst as ch')->where(DB::raw('md5(pk_ch_id)'), $id)
+                        ->join('category_mst as c', 'ch.fk_cat_id', '=', 'c.pk_cat_id')
+                        ->select(DB::raw('ch.*,c.cate_name'))
+                        ->get()->toArray();
+        if (count($get_channel_list) > 0) {
+            $image_file = './upload/channel/' . $get_channel_list[0]["channel_logo"];
+            if (file_exists($image_file)) {
+                unlink($image_file);
+            }            
+            $delete_record = Channel::from('channel_mst')->where(DB::raw('md5(pk_ch_id)'), $id)->delete();
+            if ($delete_record == 1) {
+                Session::flash('SucMessage', 'Channel has been deleted successfully!');
+            } else {
+                Session::flash('ErrorMessages', 'Channel has not been deleted successfully!');
+            }
+        }
+        return redirect('admin/channel');
     }
 
 }

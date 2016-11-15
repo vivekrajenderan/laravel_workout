@@ -85,7 +85,7 @@
                                         <td><?php  echo date("Y-m-d", strtotime($list['created_on']));
                                             ?></td>
                                         <td >   <a href="<?php echo url('admin/channel/edit'); ?>/<?php echo md5($list['pk_ch_id']); ?>" title="edit"><i class="fa fa-edit"></i></a> 
-                                            &nbsp;&nbsp;&nbsp;<a title="delete" href="<?php echo url('admin/channel/delete_channel'); ?>/<?php echo md5($list['pk_ch_id']); ?>" onClick="return confirm('Do u really want to delete Sub Category?');" > <i class="fa fa-trash"></i></a>
+                                            &nbsp;&nbsp;&nbsp;<a title="delete" href="<?php echo url('admin/channel/delete'); ?>/<?php echo md5($list['pk_ch_id']); ?>" onClick="return confirm('Do u really want to delete Channel?');" > <i class="fa fa-trash"></i></a>
                                         &nbsp;&nbsp;&nbsp;
                                             <input type="checkbox" class="switch" <?php
                                                    if ($list['standing'] == "1") {

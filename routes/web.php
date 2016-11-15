@@ -93,5 +93,8 @@ Route::group(['prefix' => 'admin'], function () {
     Route::get('channel/edit/{id}', 'ChannelController@edit');
 });
 
+Route::group(['prefix' => 'admin'], function () {
+    Route::get('channel/delete/{id}', 'ChannelController@delete');
+});
 
 });

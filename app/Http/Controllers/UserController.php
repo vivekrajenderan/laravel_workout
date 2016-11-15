@@ -214,10 +214,7 @@ class UserController extends Controller {
                                 ['emailid' => $value->emailid, 'fname' => $value->firstname, 'lname' => $value->lastname, 'mobileno' => $value->mobileno, 'vc_number' => $value->vcnumber]
                         );
                         $x++;
-                    }
-
-
-                    //$insert[] = ['title' => $value->title, 'description' => $value->description];
+                    }                    
                 }
 
 
