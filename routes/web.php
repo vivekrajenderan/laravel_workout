@@ -85,6 +85,13 @@ Route::group(['prefix' => 'admin'], function () {
     Route::post('channel/exist-channel-check', 'ChannelController@exist_channel_check');
 });
 
+Route::group(['prefix' => 'admin'], function () {
+    Route::post('channel/ajax-edit', 'ChannelController@ajax_edit');
+});
+
+Route::group(['prefix' => 'admin'], function () {
+    Route::get('channel/edit/{id}', 'ChannelController@edit');
+});
 
 
 });
